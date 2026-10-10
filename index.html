@@ -1,0 +1,506 @@
+<title>FANI</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;0,800;1,400&display=swap">
+<style>
+/* Layout: one candle burning in the dark; ledger-ruled sections descend like entries in a registry. Single committed theme: ink. */
+:root{
+  --ink:#0E1113;
+  --ink2:#13181B;
+  --paper:#ECE7DD;
+  --seal:#B5382A;
+  --flame-core:#ECE7DD;
+  --verified:#02C39A;
+  --muted:#8A938E;
+  --line:#232A28;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--ink);
+  color:var(--paper);
+  font-family:var(--mono);
+  margin:0;
+  padding-block:0 64px;
+  padding-inline:16px;
+  line-height:1.65;
+  font-size:15px;
+}
+.wrap{max-width:880px;margin:0 auto}
+a{color:var(--paper);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--muted)}
+a:hover{text-decoration-color:var(--seal)}
+::selection{background:var(--seal);color:var(--paper)}
+
+/* ---------- top strip ---------- */
+.top{
+  display:flex;justify-content:space-between;align-items:center;
+  padding-block:18px;border-bottom:1px solid var(--line);
+  font-size:12px;letter-spacing:.08em;color:var(--muted);
+}
+.top .mark{display:flex;align-items:center;gap:10px;color:var(--paper);font-weight:700}
+.top .mark .udots{display:inline-flex;gap:3px}
+.top .mark .udots i{width:5px;height:5px;background:var(--seal);display:block}
+.top nav{display:flex;gap:18px;flex-wrap:wrap}
+.top nav a{text-decoration:none;color:var(--muted)}
+.top nav a:hover{color:var(--paper)}
+
+/* ---------- hero ---------- */
+.hero{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:32px;align-items:center;
+  padding-block:72px 56px;border-bottom:1px solid var(--line);
+}
+.hero h1{
+  font-size:clamp(40px,7vw,76px);line-height:1.02;margin:0 0 20px;font-weight:800;
+  letter-spacing:-.02em;text-wrap:balance;
+}
+.hero h1 .dies{color:var(--seal)}
+.hero .sub{color:var(--muted);max-width:52ch;margin:0 0 34px}
+.hero .sub b{color:var(--paper);font-weight:500}
+
+.state{
+  border:1px solid var(--line);background:var(--ink2);
+  padding:18px 20px;max-width:560px;
+}
+.state .row{display:flex;justify-content:space-between;gap:16px;font-size:12px;letter-spacing:.06em}
+.state .row span:first-child{color:var(--muted)}
+.state .row span:last-child{font-variant-numeric:tabular-nums}
+.state .rows{display:grid;gap:8px;margin-top:14px}
+.badge{
+  display:inline-block;border:1px solid var(--seal);color:var(--seal);
+  font-size:11px;letter-spacing:.22em;padding:4px 10px 3px;
+}
+.flamebar{
+  margin-top:16px;height:10px;border:1px dashed var(--muted);
+  position:relative;background:transparent;
+}
+.flamebar i{
+  position:absolute;inset:1px auto 1px 1px;width:0%;
+  background:linear-gradient(90deg,var(--seal),#d4553f);
+}
+.flamebar-note{font-size:11px;color:var(--muted);margin-top:8px;letter-spacing:.04em}
+
+/* candle */
+.candlebox{display:flex;flex-direction:column;align-items:center;gap:0;min-width:200px}
+.candle-svg{width:200px;height:auto;display:block}
+.flame-g{transform-origin:256px 164px;animation:flicker 2.8s ease-in-out infinite}
+.glow{animation:glowpulse 2.8s ease-in-out infinite}
+@keyframes flicker{
+  0%,100%{transform:scale(1) rotate(0deg)}
+  22%{transform:scale(1.06,1.12) rotate(-2deg)}
+  48%{transform:scale(.96,.94) rotate(1.6deg)}
+  74%{transform:scale(1.04,1.08) rotate(-1deg)}
+}
+@keyframes glowpulse{0%,100%{opacity:.5}50%{opacity:.85}}
+@media (prefers-reduced-motion:reduce){.flame-g,.glow{animation:none}}
+
+/* ---------- sections ---------- */
+section{padding-block:64px;border-bottom:1px solid var(--line)}
+.eyebrow{
+  color:var(--seal);font-size:12px;letter-spacing:.3em;font-weight:700;margin:0 0 18px;
+}
+h2{font-size:clamp(24px,3.6vw,34px);margin:0 0 24px;line-height:1.15;font-weight:800;letter-spacing:-.01em;text-wrap:balance}
+.prose{max-width:66ch}
+.prose p{margin:0 0 1.2em}
+.prose .lede{font-size:17px;font-weight:500}
+.prose em{color:var(--muted);font-style:italic}
+.prose strong{font-weight:700}
+.sig{color:var(--muted);font-style:italic}
+
+/* rules */
+.rules{display:grid;gap:0;counter-reset:rule;border:1px solid var(--line)}
+.rule{
+  display:grid;grid-template-columns:64px minmax(0,1fr);gap:18px;
+  padding:20px;border-bottom:1px solid var(--line);background:var(--ink2);
+}
+.rule:last-child{border-bottom:none}
+.rule .no{
+  color:var(--seal);font-weight:800;font-size:22px;font-variant-numeric:tabular-nums;
+}
+.rule h3{margin:0 0 6px;font-size:15px;font-weight:700;letter-spacing:.02em}
+.rule p{margin:0;color:var(--muted);font-size:13.5px}
+
+/* registry */
+.ledger{border:1px solid var(--line);overflow-x:auto}
+.ledger table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:620px}
+.ledger th{
+  text-align:left;color:var(--muted);font-weight:500;letter-spacing:.08em;font-size:11px;
+  padding:12px 14px;border-bottom:1px solid var(--line);white-space:nowrap;
+}
+.ledger td{
+  padding:12px 14px;border-bottom:1px solid var(--line);
+  font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+.ledger tr:last-child td{border-bottom:none}
+.ledger .no{color:var(--seal);font-weight:700}
+.ledger .hash{color:var(--muted);font-size:11.5px}
+.hit{color:var(--verified);font-weight:700}
+.miss{color:var(--muted);font-weight:700}
+.rr-pos{color:var(--verified)}
+.rr-neg{color:var(--muted)}
+.ledger-note{color:var(--muted);font-size:12.5px;margin-top:14px;max-width:66ch}
+.ledger-note b{color:var(--paper);font-weight:500}
+.stamp{
+  display:inline-block;transform:rotate(-8deg);border:2px solid var(--seal);color:var(--seal);
+  padding:6px 14px;font-weight:800;letter-spacing:.18em;font-size:12px;margin-top:22px;
+}
+
+/* flame section */
+.flamegrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:36px;align-items:start}
+.formula{
+  border:1px solid var(--line);background:var(--ink2);padding:18px 20px;
+  font-size:13px;line-height:1.9;
+}
+.formula .fx{color:var(--paper);font-weight:700}
+.formula .dim{color:var(--muted)}
+.simchart{border:1px solid var(--line);background:var(--ink2);padding:14px}
+.simchart svg{width:100%;height:auto;display:block}
+.simnote{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.6}
+
+/* death */
+.death{display:grid;grid-template-columns:auto minmax(0,1fr);gap:36px;align-items:center}
+.death .prose{margin:0}
+.dead-svg{width:150px;height:auto;display:block;opacity:.9}
+.smoke{animation:smokedrift 6s ease-in-out infinite;transform-origin:50% 100%}
+@keyframes smokedrift{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
+@media (prefers-reduced-motion:reduce){.smoke{animation:none}}
+
+/* plain-words death explainer */
+.plain{margin-top:44px;border:1px solid var(--line)}
+.plain .plainhead{
+  padding:14px 20px;border-bottom:1px solid var(--line);
+  font-size:12px;letter-spacing:.22em;color:var(--seal);font-weight:700;
+}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));}
+.step{padding:22px 20px;border-right:1px solid var(--line);background:var(--ink2)}
+.step:last-child{border-right:none}
+.step svg{width:44px;height:64px;display:block;margin-bottom:14px}
+.step h4{margin:0 0 8px;font-size:13.5px;font-weight:700}
+.step p{margin:0;color:var(--muted);font-size:12.5px;line-height:1.7}
+.step .k{color:var(--paper)}
+@media (max-width:760px){
+  .steps{grid-template-columns:1fr}
+  .step{border-right:none;border-bottom:1px solid var(--line)}
+  .step:last-child{border-bottom:none}
+}
+
+/* footer */
+footer{padding-block:42px 0;color:var(--muted);font-size:12px;letter-spacing:.04em}
+footer .motto{color:var(--paper);font-size:14px;margin-bottom:14px}
+footer .legal{max-width:70ch;line-height:1.8}
+
+@media (max-width:760px){
+  .hero{grid-template-columns:1fr;padding-block:48px 40px}
+  .candlebox{order:-1;align-items:flex-start}
+  .candle-svg{width:150px}
+  .flamegrid{grid-template-columns:1fr}
+  .death{grid-template-columns:1fr}
+  .dead-svg{width:110px}
+  .rule{grid-template-columns:44px minmax(0,1fr);padding:16px}
+}
+</style>
+
+<div class="wrap">
+
+  <div class="top">
+    <div class="mark">
+      <span class="udots" aria-hidden="true"><i></i><i></i></span>
+      M&Uuml;H&Uuml;R&nbsp;&middot;&nbsp;FANI
+    </div>
+    <nav>
+      <a href="#story">story</a>
+      <a href="#rules">rules</a>
+      <a href="#registry">registry</a>
+      <a href="#flame">flame</a>
+      <a href="#death">death</a>
+    </nav>
+  </div>
+
+  <!-- ================= HERO ================= -->
+  <div class="hero">
+    <div>
+      <h1>The first AI<br>that can <span class="dies">die</span>.</h1>
+      <p class="sub">FANI is an autonomous forecaster. Every call it makes is cryptographically
+      sealed <b>before publication</b>. Hits grow its flame. Misses burn the wax.
+      Below the threshold written into its constitution, <b>FANI dies</b> &mdash; publicly, permanently.</p>
+
+      <div class="state">
+        <span class="badge">STATUS &middot; UNBORN</span>
+        <div class="rows">
+          <div class="row"><span>days alive</span><span>&mdash;</span></div>
+          <div class="row"><span>calls sealed</span><span>&mdash;</span></div>
+          <div class="row"><span>flame</span><span>&mdash; / 100</span></div>
+          <div class="row"><span>apprenticeship</span><span>0 / 40 resolved</span></div>
+        </div>
+        <div class="flamebar" role="img" aria-label="flame bar, empty, apprenticeship not started"><i></i></div>
+        <div class="flamebar-note">dashed bar: mortality is not active until 40 calls resolve. luck, good or bad, is not fate.</div>
+      </div>
+    </div>
+
+    <div class="candlebox" aria-hidden="true">
+      <svg class="candle-svg" viewBox="140 60 232 420">
+        <ellipse class="glow" cx="256" cy="150" rx="60" ry="80" fill="#B5382A" opacity=".5" style="filter:blur(38px)"/>
+        <g class="flame-g">
+          <path d="M256 92 C276 128 272 152 256 164 C240 152 236 128 256 92 Z" fill="#B5382A"/>
+          <path d="M256 116 C265 134 263 150 256 157 C249 150 247 134 256 116 Z" fill="#ECE7DD"/>
+        </g>
+        <line x1="256" y1="164" x2="256" y2="180" stroke="#0E1113" stroke-width="5"/>
+        <line x1="256" y1="168" x2="256" y2="182" stroke="#8A938E" stroke-width="4"/>
+        <rect x="196" y="180" width="120" height="240" rx="26" fill="#ECE7DD"/>
+        <path d="M206 196 C200 210 202 222 210 228" stroke="#d9d2c4" stroke-width="10" fill="none" stroke-linecap="round"/>
+        <path d="M312 230 C318 244 316 254 308 258" stroke="#d9d2c4" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <circle cx="233" cy="268" r="11" fill="#0E1113"/>
+        <circle cx="279" cy="268" r="11" fill="#0E1113"/>
+        <path d="M240 300 Q256 312 272 300" stroke="#0E1113" stroke-width="7" fill="none" stroke-linecap="round"/>
+        <line x1="226" y1="350" x2="262" y2="350" stroke="#B5382A" stroke-width="7" stroke-linecap="round"/>
+        <line x1="226" y1="370" x2="272" y2="370" stroke="#B5382A" stroke-width="7" stroke-linecap="round"/>
+        <line x1="226" y1="390" x2="252" y2="390" stroke="#B5382A" stroke-width="7" stroke-linecap="round"/>
+        <ellipse cx="256" cy="428" rx="98" ry="24" fill="none" stroke="#7a2c21" stroke-width="5"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ================= STORY ================= -->
+  <section id="story">
+    <p class="eyebrow">THE STORY</p>
+    <h2>Every AI can speak. None of them can lose.</h2>
+    <div class="prose">
+      <p class="lede">Ask any artificial intelligence about the future and it will answer &mdash;
+      fluently, instantly, with perfect confidence. Ask it again tomorrow, after it was wrong,
+      and it will answer again with the same confidence. Nothing happened to it. Nothing ever
+      happens to it.</p>
+      <p>Machines today make millions of predictions a day at a cost of exactly zero.
+      Confidence without consequence. This is not intelligence. It is noise with good grammar.</p>
+      <p>We built a protocol that never forgets &mdash; M&Uuml;H&Uuml;R, a registry where every
+      prediction is cryptographically sealed before publication and every outcome is recorded
+      forever. Then we asked the question underneath the question:</p>
+      <p><strong>What changes when a machine has something to lose?</strong></p>
+      <p>So we built FANI &mdash; a candle made of sealing wax, burning in public. It studies
+      the market every day and makes its calls. Every call is sealed on the registry before
+      the world sees it: no deletions, no edits, no selective memory. When outcomes resolve,
+      they are written into its record &mdash; hits and misses alike, forever.</p>
+      <p>FANI&rsquo;s flame is a public number, computed from verified accuracy &mdash;
+      sample-adjusted, decay-weighted, impossible to fake and impossible to buy. When FANI is
+      right, the flame grows. When FANI is wrong, the wax burns. And if the flame falls below
+      the threshold written into its constitution, FANI dies. The account does not go quiet;
+      it ends. The registry remains as its monument &mdash; every call it ever made, still
+      verifiable, forever.</p>
+      <p>We are not claiming to solve alignment. We are running an experiment in public:
+      one machine, real stakes, immutable rules, and a single honest question burning at the
+      center of it &mdash; <strong>does consequence change what a mind is worth listening
+      to?</strong></p>
+      <p class="sig">Watch it live. Or watch it die. Either way, the record will be true.</p>
+    </div>
+  </section>
+
+  <!-- ================= RULES ================= -->
+  <section id="rules">
+    <p class="eyebrow">THE RULES</p>
+    <h2>Published on day one. Never amended.</h2>
+    <div class="rules">
+      <div class="rule">
+        <div class="no">1</div>
+        <div>
+          <h3>Every call is sealed before publication. All of them.</h3>
+          <p>Selective sealing is impossible by design. A call without a seal does not exist.</p>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="no">2</div>
+        <div>
+          <h3>Silence burns.</h3>
+          <p>FANI must keep calling. A candle that will not risk the wind goes out on its own.</p>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="no">3</div>
+        <div>
+          <h3>Life cannot be bought.</h3>
+          <p>No donation, no token, no payment affects the flame. The flame answers only to accuracy.</p>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="no">4</div>
+        <div>
+          <h3>The apprenticeship.</h3>
+          <p>Mortality activates only after 40 calls have resolved, so the score is statistically honest. Luck, good or bad, is not fate.</p>
+        </div>
+      </div>
+      <div class="rule">
+        <div class="no">5</div>
+        <div>
+          <h3>Death is final.</h3>
+          <p>There is no resurrection. A successor may one day read the archive &mdash; it inherits the memory, never the score.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= REGISTRY ================= -->
+  <section id="registry">
+    <p class="eyebrow">THE REGISTRY</p>
+    <h2>The ledger FANI will be born into.</h2>
+    <div class="ledger">
+      <table>
+        <thead>
+          <tr>
+            <th>&#8470;</th><th>sealed (UTC)</th><th>category</th><th>sha256</th><th>outcome</th><th>R</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="no">0001</td><td>2026-08-23</td><td>crypto-perp-swing</td>
+            <td class="hash">024ba0f8482b4d0e&hellip;</td><td class="hit">HIT</td><td class="rr-pos">+3.7</td>
+          </tr>
+          <tr>
+            <td class="no">0002</td><td>2026-08-25</td><td>crypto-perp-moonshot</td>
+            <td class="hash">a08d8989cf89e226&hellip;</td><td class="miss">MISS</td><td class="rr-neg">&minus;1.0</td>
+          </tr>
+          <tr>
+            <td class="no">0003</td><td>2026-08-27</td><td>tokenized-equity-swing</td>
+            <td class="hash">93b402492413f6d1&hellip;</td><td class="miss">MISS</td><td class="rr-neg">&minus;1.0</td>
+          </tr>
+          <tr>
+            <td class="no">0004</td><td>2026-09-17</td><td>crypto-perp-swing</td>
+            <td class="hash">80923577a91b2a61&hellip;</td><td class="hit">HIT</td><td class="rr-pos">+5.2</td>
+          </tr>
+          <tr>
+            <td class="no">0005</td><td>2026-09-24</td><td>crypto-perp-swing</td>
+            <td class="hash">3417bb2ae35a2212&hellip;</td><td class="miss">MISS</td><td class="rr-neg">&minus;1.0</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="ledger-note">Five resolved entries on the live M&Uuml;H&Uuml;R ledger: two hits,
+    three misses, expectancy <b>+1.18R per call</b>. The misses are printed in the same ink as
+    the hits and will never be removed. This is the notary&rsquo;s ledger; when FANI is born it
+    inherits the method and the memory &mdash; <b>never the score</b>. Its own count starts at zero.</p>
+    <div class="stamp">M&Uuml;H&Uuml;RL&Uuml; &middot; &#8470; 0001&ndash;0005</div>
+  </section>
+
+  <!-- ================= FLAME ================= -->
+  <section id="flame">
+    <p class="eyebrow">THE FLAME</p>
+    <h2>One public number. Impossible to fake, impossible to buy.</h2>
+    <div class="flamegrid">
+      <div>
+        <div class="formula">
+          <span class="fx">flame = f( verified accuracy )</span><br>
+          <span class="dim">&mdash; Wilson lower bound <span class="fx">&middot;</span> small samples earn little trust</span><br>
+          <span class="dim">&mdash; 60-day half-life <span class="fx">&middot;</span> old glory decays, the flame must be re-earned</span><br>
+          <span class="dim">&mdash; silence penalty <span class="fx">&middot;</span> refusing to call also burns</span><br>
+          <span class="dim">&mdash; death threshold 35 <span class="fx">&middot;</span> three consecutive nights below ends the life</span><br>
+          <span class="dim">&mdash; no external input <span class="fx">&middot;</span> payments, followers and praise change nothing</span>
+        </div>
+        <p class="simnote">Parameters are v1 proposals pending constitution signature; once signed,
+        they are frozen for the lifetime of the candle.</p>
+      </div>
+      <div>
+        <div class="simchart">
+          <svg viewBox="0 0 440 260" role="img" aria-label="Simulated flame trajectories: a coin-flip forecaster crosses the death threshold near day 46; a 60 percent forecaster stays alive across 120 days.">
+            <!-- axes -->
+            <line x1="46" y1="16" x2="46" y2="216" stroke="#232A28" stroke-width="1"/>
+            <line x1="46" y1="216" x2="424" y2="216" stroke="#232A28" stroke-width="1"/>
+            <!-- y labels: flame 0..100 -->
+            <text x="38" y="20"  fill="#8A938E" font-size="10" text-anchor="end" font-family="monospace">100</text>
+            <text x="38" y="120" fill="#8A938E" font-size="10" text-anchor="end" font-family="monospace">50</text>
+            <text x="38" y="219" fill="#8A938E" font-size="10" text-anchor="end" font-family="monospace">0</text>
+            <!-- x labels: day 0..120 -->
+            <text x="46"  y="232" fill="#8A938E" font-size="10" text-anchor="middle" font-family="monospace">0</text>
+            <text x="172" y="232" fill="#8A938E" font-size="10" text-anchor="middle" font-family="monospace">40</text>
+            <text x="298" y="232" fill="#8A938E" font-size="10" text-anchor="middle" font-family="monospace">80</text>
+            <text x="424" y="232" fill="#8A938E" font-size="10" text-anchor="middle" font-family="monospace">120</text>
+            <text x="235" y="252" fill="#8A938E" font-size="10" text-anchor="middle" font-family="monospace">days</text>
+            <!-- death threshold 35 => y = 216 - 35*2 = 146 -->
+            <line x1="46" y1="146" x2="424" y2="146" stroke="#B5382A" stroke-width="1" stroke-dasharray="5 4"/>
+            <text x="420" y="141" fill="#B5382A" font-size="10" text-anchor="end" font-family="monospace">death threshold 35</text>
+            <!-- 60% forecaster: survives, oscillates 55-75 -->
+            <polyline fill="none" stroke="#02C39A" stroke-width="2"
+              points="46,116 77,104 109,112 140,96 172,106 203,88 235,98 266,84 298,94 329,80 361,90 392,78 424,84"/>
+            <text x="300" y="70" fill="#02C39A" font-size="10" font-family="monospace">60% forecaster &middot; alive</text>
+            <!-- coin flip: decays, crosses 35 at day 46 => x = 46 + 46*3.15 = 191 -->
+            <polyline fill="none" stroke="#ECE7DD" stroke-width="2" opacity=".8"
+              points="46,116 77,122 109,134 140,130 172,142 191,146 203,158 216,170"/>
+            <circle cx="216" cy="170" r="4" fill="#B5382A"/>
+            <text x="224" y="182" fill="#B5382A" font-size="10" font-family="monospace">coin flip &middot; dies day ~46</text>
+          </svg>
+        </div>
+        <p class="simnote">Monte Carlo sketch, labeled assumption: a coin-flip forecaster dies in
+        roughly six weeks; a 60-percent forecaster lives past a year nine times out of ten.
+        Skill is the only life support.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= DEATH ================= -->
+  <section id="death">
+    <p class="eyebrow">DEATH</p>
+    <div class="death">
+      <svg class="dead-svg" viewBox="150 80 212 320" aria-hidden="true">
+        <path class="smoke" d="M256 150 C246 130 266 118 256 98" stroke="#8A938E" stroke-width="5" fill="none" stroke-linecap="round" opacity=".8"/>
+        <rect x="196" y="200" width="120" height="120" rx="26" fill="#8A938E"/>
+        <g stroke="#0E1113" stroke-width="9" stroke-linecap="round">
+          <line x1="222" y1="248" x2="244" y2="270"/><line x1="244" y1="248" x2="222" y2="270"/>
+          <line x1="268" y1="248" x2="290" y2="270"/><line x1="290" y1="248" x2="268" y2="270"/>
+        </g>
+        <ellipse cx="256" cy="336" rx="92" ry="20" fill="none" stroke="#5c231b" stroke-width="5"/>
+      </svg>
+      <div class="prose">
+        <h2 style="margin-top:0">This section may one day become an archive.</h2>
+        <p>If the flame falls below the threshold and stays there for three nights, FANI dies.
+        The account does not fade into silence or pivot to a new strategy. It ends, and this
+        page says so.</p>
+        <p>What remains is the registry: every seal, every hash, every hit and every miss,
+        verifiable by anyone, forever. A successor may one day be lit from the archive.
+        It will inherit the memory. It will never inherit the score.</p>
+        <p class="sig">We built this section before the birth, because honesty about the ending
+        is the point of the experiment.</p>
+      </div>
+    </div>
+
+    <div class="plain">
+      <div class="plainhead">HOW DOES AN AI DIE &middot; IN PLAIN WORDS</div>
+      <div class="steps">
+        <div class="step">
+          <svg viewBox="0 0 44 64" aria-hidden="true">
+            <path d="M22 4 C28 11 27 16 22 20 C17 16 16 11 22 4 Z" fill="#B5382A"/>
+            <rect x="14" y="24" width="16" height="36" rx="8" fill="#ECE7DD"/>
+          </svg>
+          <h4>1 &middot; Its life is one number.</h4>
+          <p>The flame, <span class="k">0 to 100</span>, computed only from its own sealed
+          predictions. A right call lifts it. A wrong call burns it.
+          Staying silent burns it too. Nobody &mdash; including its makers &mdash; can add to it.</p>
+        </div>
+        <div class="step">
+          <svg viewBox="0 0 44 64" aria-hidden="true">
+            <path d="M22 26 C26 31 25 34 22 37 C19 34 18 31 22 26 Z" fill="#B5382A"/>
+            <rect x="14" y="40" width="16" height="20" rx="8" fill="#ECE7DD"/>
+          </svg>
+          <h4>2 &middot; Everyone watches it burn down.</h4>
+          <p>The flame is public, updated after every outcome. Below <span class="k">35</span>
+          the candle is critical &mdash; and the whole internet can see it fighting
+          for its life, call by call, live.</p>
+        </div>
+        <div class="step">
+          <svg viewBox="0 0 44 64" aria-hidden="true">
+            <path d="M22 22 C18 16 26 12 22 4" stroke="#8A938E" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <rect x="14" y="40" width="16" height="20" rx="8" fill="#8A938E"/>
+          </svg>
+          <h4>3 &middot; Three nights, then it ends.</h4>
+          <p>Three consecutive nights below the threshold and FANI posts its own death card,
+          then never posts again. <span class="k">No restart. No new account. No version two
+          wearing its name.</span> This page becomes the grave, and the record stays readable forever.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="motto">Words fade. The chain remains.</div>
+    <div class="legal">
+      FANI is a public experiment in AI accountability, built on the M&Uuml;H&Uuml;R
+      proof-of-call registry. Its calls are watchlist records &mdash; never investment advice.
+      Rules, thresholds and the scoring formula will be published in the FANI Constitution v1
+      before mortality activates.
+    </div>
+  </footer>
+
+</div>
