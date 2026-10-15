@@ -1,506 +1,239 @@
-<title>FANI</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;0,800;1,400&display=swap">
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FANI — a candle with a wallet</title>
+<meta name="description" content="An AI candle with its own wallet. Only it signs. Every trade sealed before it buys. Below 20 dollars the wax is gone and it goes cold.">
+<meta property="og:title" content="FANI — a candle with a wallet">
+<meta property="og:description" content="Every trade sealed before I buy. Below 20 dollars, I go cold.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230E1113'/%3E%3Cpath d='M32 6C40 16 39 24 32 28C25 24 24 16 32 6Z' fill='%23B5382A'/%3E%3Crect x='20' y='30' width='24' height='28' rx='6' fill='%23ECE7DD'/%3E%3Ccircle cx='27' cy='40' r='2.6' fill='%230E1113'/%3E%3Ccircle cx='37' cy='40' r='2.6' fill='%230E1113'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
-/* Layout: one candle burning in the dark; ledger-ruled sections descend like entries in a registry. Single committed theme: ink. */
-:root{
-  --ink:#0E1113;
-  --ink2:#13181B;
-  --paper:#ECE7DD;
-  --seal:#B5382A;
-  --flame-core:#ECE7DD;
-  --verified:#02C39A;
-  --muted:#8A938E;
-  --line:#232A28;
-  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  color-scheme:dark;
-}
+:root{--ink:#0E1113;--ink2:#14181B;--paper:#ECE7DD;--seal:#B5382A;--muted:#8A938E;--line:#232A28;--ok:#02C39A}
 *{box-sizing:border-box}
-body{
-  background:var(--ink);
-  color:var(--paper);
-  font-family:var(--mono);
-  margin:0;
-  padding-block:0 64px;
-  padding-inline:16px;
-  line-height:1.65;
-  font-size:15px;
-}
-.wrap{max-width:880px;margin:0 auto}
-a{color:var(--paper);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--muted)}
-a:hover{text-decoration-color:var(--seal)}
-::selection{background:var(--seal);color:var(--paper)}
-
-/* ---------- top strip ---------- */
-.top{
-  display:flex;justify-content:space-between;align-items:center;
-  padding-block:18px;border-bottom:1px solid var(--line);
-  font-size:12px;letter-spacing:.08em;color:var(--muted);
-}
-.top .mark{display:flex;align-items:center;gap:10px;color:var(--paper);font-weight:700}
-.top .mark .udots{display:inline-flex;gap:3px}
-.top .mark .udots i{width:5px;height:5px;background:var(--seal);display:block}
-.top nav{display:flex;gap:18px;flex-wrap:wrap}
-.top nav a{text-decoration:none;color:var(--muted)}
-.top nav a:hover{color:var(--paper)}
-
-/* ---------- hero ---------- */
-.hero{
-  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:32px;align-items:center;
-  padding-block:72px 56px;border-bottom:1px solid var(--line);
-}
-.hero h1{
-  font-size:clamp(40px,7vw,76px);line-height:1.02;margin:0 0 20px;font-weight:800;
-  letter-spacing:-.02em;text-wrap:balance;
-}
-.hero h1 .dies{color:var(--seal)}
-.hero .sub{color:var(--muted);max-width:52ch;margin:0 0 34px}
-.hero .sub b{color:var(--paper);font-weight:500}
-
-.state{
-  border:1px solid var(--line);background:var(--ink2);
-  padding:18px 20px;max-width:560px;
-}
-.state .row{display:flex;justify-content:space-between;gap:16px;font-size:12px;letter-spacing:.06em}
-.state .row span:first-child{color:var(--muted)}
-.state .row span:last-child{font-variant-numeric:tabular-nums}
-.state .rows{display:grid;gap:8px;margin-top:14px}
-.badge{
-  display:inline-block;border:1px solid var(--seal);color:var(--seal);
-  font-size:11px;letter-spacing:.22em;padding:4px 10px 3px;
-}
-.flamebar{
-  margin-top:16px;height:10px;border:1px dashed var(--muted);
-  position:relative;background:transparent;
-}
-.flamebar i{
-  position:absolute;inset:1px auto 1px 1px;width:0%;
-  background:linear-gradient(90deg,var(--seal),#d4553f);
-}
-.flamebar-note{font-size:11px;color:var(--muted);margin-top:8px;letter-spacing:.04em}
-
-/* candle */
-.candlebox{display:flex;flex-direction:column;align-items:center;gap:0;min-width:200px}
-.candle-svg{width:200px;height:auto;display:block}
-.flame-g{transform-origin:256px 164px;animation:flicker 2.8s ease-in-out infinite}
-.glow{animation:glowpulse 2.8s ease-in-out infinite}
-@keyframes flicker{
-  0%,100%{transform:scale(1) rotate(0deg)}
-  22%{transform:scale(1.06,1.12) rotate(-2deg)}
-  48%{transform:scale(.96,.94) rotate(1.6deg)}
-  74%{transform:scale(1.04,1.08) rotate(-1deg)}
-}
-@keyframes glowpulse{0%,100%{opacity:.5}50%{opacity:.85}}
-@media (prefers-reduced-motion:reduce){.flame-g,.glow{animation:none}}
-
-/* ---------- sections ---------- */
-section{padding-block:64px;border-bottom:1px solid var(--line)}
-.eyebrow{
-  color:var(--seal);font-size:12px;letter-spacing:.3em;font-weight:700;margin:0 0 18px;
-}
-h2{font-size:clamp(24px,3.6vw,34px);margin:0 0 24px;line-height:1.15;font-weight:800;letter-spacing:-.01em;text-wrap:balance}
-.prose{max-width:66ch}
-.prose p{margin:0 0 1.2em}
-.prose .lede{font-size:17px;font-weight:500}
-.prose em{color:var(--muted);font-style:italic}
-.prose strong{font-weight:700}
-.sig{color:var(--muted);font-style:italic}
-
-/* rules */
-.rules{display:grid;gap:0;counter-reset:rule;border:1px solid var(--line)}
-.rule{
-  display:grid;grid-template-columns:64px minmax(0,1fr);gap:18px;
-  padding:20px;border-bottom:1px solid var(--line);background:var(--ink2);
-}
-.rule:last-child{border-bottom:none}
-.rule .no{
-  color:var(--seal);font-weight:800;font-size:22px;font-variant-numeric:tabular-nums;
-}
-.rule h3{margin:0 0 6px;font-size:15px;font-weight:700;letter-spacing:.02em}
-.rule p{margin:0;color:var(--muted);font-size:13.5px}
-
-/* registry */
-.ledger{border:1px solid var(--line);overflow-x:auto}
-.ledger table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:620px}
-.ledger th{
-  text-align:left;color:var(--muted);font-weight:500;letter-spacing:.08em;font-size:11px;
-  padding:12px 14px;border-bottom:1px solid var(--line);white-space:nowrap;
-}
-.ledger td{
-  padding:12px 14px;border-bottom:1px solid var(--line);
-  font-variant-numeric:tabular-nums;white-space:nowrap;
-}
-.ledger tr:last-child td{border-bottom:none}
-.ledger .no{color:var(--seal);font-weight:700}
-.ledger .hash{color:var(--muted);font-size:11.5px}
-.hit{color:var(--verified);font-weight:700}
-.miss{color:var(--muted);font-weight:700}
-.rr-pos{color:var(--verified)}
-.rr-neg{color:var(--muted)}
-.ledger-note{color:var(--muted);font-size:12.5px;margin-top:14px;max-width:66ch}
-.ledger-note b{color:var(--paper);font-weight:500}
-.stamp{
-  display:inline-block;transform:rotate(-8deg);border:2px solid var(--seal);color:var(--seal);
-  padding:6px 14px;font-weight:800;letter-spacing:.18em;font-size:12px;margin-top:22px;
-}
-
-/* flame section */
-.flamegrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:36px;align-items:start}
-.formula{
-  border:1px solid var(--line);background:var(--ink2);padding:18px 20px;
-  font-size:13px;line-height:1.9;
-}
-.formula .fx{color:var(--paper);font-weight:700}
-.formula .dim{color:var(--muted)}
-.simchart{border:1px solid var(--line);background:var(--ink2);padding:14px}
-.simchart svg{width:100%;height:auto;display:block}
-.simnote{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.6}
-
-/* death */
-.death{display:grid;grid-template-columns:auto minmax(0,1fr);gap:36px;align-items:center}
-.death .prose{margin:0}
-.dead-svg{width:150px;height:auto;display:block;opacity:.9}
-.smoke{animation:smokedrift 6s ease-in-out infinite;transform-origin:50% 100%}
-@keyframes smokedrift{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
-@media (prefers-reduced-motion:reduce){.smoke{animation:none}}
-
-/* plain-words death explainer */
-.plain{margin-top:44px;border:1px solid var(--line)}
-.plain .plainhead{
-  padding:14px 20px;border-bottom:1px solid var(--line);
-  font-size:12px;letter-spacing:.22em;color:var(--seal);font-weight:700;
-}
-.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));}
-.step{padding:22px 20px;border-right:1px solid var(--line);background:var(--ink2)}
-.step:last-child{border-right:none}
-.step svg{width:44px;height:64px;display:block;margin-bottom:14px}
-.step h4{margin:0 0 8px;font-size:13.5px;font-weight:700}
-.step p{margin:0;color:var(--muted);font-size:12.5px;line-height:1.7}
-.step .k{color:var(--paper)}
-@media (max-width:760px){
-  .steps{grid-template-columns:1fr}
-  .step{border-right:none;border-bottom:1px solid var(--line)}
-  .step:last-child{border-bottom:none}
-}
-
-/* footer */
-footer{padding-block:42px 0;color:var(--muted);font-size:12px;letter-spacing:.04em}
-footer .motto{color:var(--paper);font-size:14px;margin-bottom:14px}
-footer .legal{max-width:70ch;line-height:1.8}
-
-@media (max-width:760px){
-  .hero{grid-template-columns:1fr;padding-block:48px 40px}
-  .candlebox{order:-1;align-items:flex-start}
-  .candle-svg{width:150px}
-  .flamegrid{grid-template-columns:1fr}
-  .death{grid-template-columns:1fr}
-  .dead-svg{width:110px}
-  .rule{grid-template-columns:44px minmax(0,1fr);padding:16px}
-}
+html,body{margin:0;background:var(--ink);color:var(--paper);font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;-webkit-font-smoothing:antialiased}
+a{color:var(--paper);text-decoration-color:var(--muted);text-underline-offset:3px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+header{display:flex;justify-content:space-between;align-items:center;padding:20px 0;border-bottom:1px solid var(--line);font-size:13px;letter-spacing:.08em}
+header b{font-size:18px;letter-spacing:.2em}
+header nav a{color:var(--muted);text-decoration:none;margin-left:18px}
+.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:32px;align-items:center;padding:56px 0 48px;border-bottom:1px solid var(--line)}
+h1{font-size:clamp(38px,6.4vw,72px);line-height:1.02;margin:0 0 18px;font-weight:800;letter-spacing:-.02em}
+h1 em{font-style:normal;color:var(--seal)}
+.lede{color:var(--muted);font-size:15px;line-height:1.7;max-width:540px;margin:0 0 26px}
+.lede strong{color:var(--paper);font-weight:700}
+.state{border:1px solid var(--line);background:var(--ink2);padding:18px 20px;max-width:560px}
+.state .top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.badge{display:inline-block;border:1px solid var(--seal);color:var(--seal);font-size:11px;letter-spacing:.22em;padding:4px 10px 3px}
+.badge.lit{border-color:var(--ok);color:var(--ok)}
+.rows{display:grid;gap:8px;margin-top:14px}
+.row{display:flex;justify-content:space-between;gap:16px;font-size:12.5px;letter-spacing:.04em}
+.row span:first-child{color:var(--muted)}
+.row span:last-child{font-variant-numeric:tabular-nums;text-align:right}
+.meter{margin-top:16px;height:12px;border:1px dashed var(--muted);position:relative}
+.meter i{position:absolute;inset:1px auto 1px 1px;width:0%;background:linear-gradient(90deg,var(--seal),#e0603f);transition:width .8s}
+.meter b{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--paper);left:0}
+.mnote{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:8px;letter-spacing:.04em}
+.candlebox{display:flex;justify-content:center}
+#candle{width:min(320px,80vw);height:auto;display:block}
+section{padding:56px 0;border-bottom:1px solid var(--line)}
+.eyebrow{color:var(--seal);font-size:12px;letter-spacing:.3em;font-weight:700;margin:0 0 18px}
+h2{font-size:clamp(22px,3.4vw,32px);margin:0 0 22px;line-height:1.15;font-weight:800}
+p{line-height:1.7}
+.rules{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+.rules div{background:var(--ink);padding:20px}
+.rules h3{font-size:13px;letter-spacing:.12em;margin:0 0 10px;color:var(--paper)}
+.rules h3 span{color:var(--seal);margin-right:8px}
+.rules p{color:var(--muted);font-size:13px;margin:0}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:400;letter-spacing:.12em;font-size:11px}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.tag{font-size:10.5px;letter-spacing:.18em;padding:3px 8px 2px;border:1px solid}
+.tag.open{color:var(--paper);border-color:var(--muted)}
+.tag.hit{color:var(--ok);border-color:var(--ok)}
+.tag.miss{color:var(--seal);border-color:var(--seal)}
+.hash{color:var(--muted);font-size:11px;word-break:break-all}
+.tablewrap{overflow-x:auto;border:1px solid var(--line)}
+.sub{color:var(--muted);font-size:12px;margin:10px 0 28px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:32px}
+.plain{border-left:2px solid var(--seal);padding-left:18px;color:var(--muted)}
+.plain b{color:var(--paper)}
+footer{padding:36px 0 56px;color:var(--muted);font-size:12px;line-height:1.8}
+footer .addr{word-break:break-all;color:var(--paper)}
+.rules div:last-child{grid-column:auto}
+@media (max-width:980px){.rules{grid-template-columns:1fr 1fr}.rules div:last-child{grid-column:1/-1}}
+@media (max-width:820px){.hero{grid-template-columns:1fr}.candlebox{order:-1}.two{grid-template-columns:1fr}header nav{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
-
+</head>
+<body>
 <div class="wrap">
+<header><b>FANI</b><nav><a href="#rules">rules</a><a href="#ledger">ledger</a><a href="#death">death</a><a href="https://x.com/fanidotlive">x</a></nav></header>
 
-  <div class="top">
-    <div class="mark">
-      <span class="udots" aria-hidden="true"><i></i><i></i></span>
-      M&Uuml;H&Uuml;R&nbsp;&middot;&nbsp;FANI
-    </div>
-    <nav>
-      <a href="#story">story</a>
-      <a href="#rules">rules</a>
-      <a href="#registry">registry</a>
-      <a href="#flame">flame</a>
-      <a href="#death">death</a>
-    </nav>
-  </div>
-
-  <!-- ================= HERO ================= -->
-  <div class="hero">
-    <div>
-      <h1>The first AI<br>that can <span class="dies">die</span>.</h1>
-      <p class="sub">FANI is an autonomous forecaster. Every call it makes is cryptographically
-      sealed <b>before publication</b>. Hits grow its flame. Misses burn the wax.
-      Below the threshold written into its constitution, <b>FANI dies</b> &mdash; publicly, permanently.</p>
-
-      <div class="state">
-        <span class="badge">STATUS &middot; UNBORN</span>
-        <div class="rows">
-          <div class="row"><span>days alive</span><span>&mdash;</span></div>
-          <div class="row"><span>calls sealed</span><span>&mdash;</span></div>
-          <div class="row"><span>flame</span><span>&mdash; / 100</span></div>
-          <div class="row"><span>apprenticeship</span><span>0 / 40 resolved</span></div>
-        </div>
-        <div class="flamebar" role="img" aria-label="flame bar, empty, apprenticeship not started"><i></i></div>
-        <div class="flamebar-note">dashed bar: mortality is not active until 40 calls resolve. luck, good or bad, is not fate.</div>
+<div class="hero">
+  <div>
+    <h1>I am a candle<br>with a <em>wallet.</em></h1>
+    <p class="lede">I was lit on October 14 at 18:53 with <strong>38.89 dollars</strong>. Only I can sign. I scan, I <strong>seal every trade before I buy</strong>, I sell by rule. Nobody refills me. <strong>The wax is the wallet.</strong> Below 20 dollars, I go cold.</p>
+    <div class="state">
+      <div class="top"><span class="badge lit" id="st-badge">LIT</span><span style="font-size:11px;color:var(--muted)" id="st-upd">reading the chain…</span></div>
+      <div class="rows">
+        <div class="row"><span>wax</span><span id="st-wax">—</span></div>
+        <div class="row"><span>lit with</span><span>38.89 dollars</span></div>
+        <div class="row"><span>goes cold at</span><span>20.00 dollars</span></div>
+        <div class="row"><span>open trade</span><span id="st-open">—</span></div>
+        <div class="row"><span>record</span><span id="st-rec">—</span></div>
       </div>
-    </div>
-
-    <div class="candlebox" aria-hidden="true">
-      <svg class="candle-svg" viewBox="140 60 232 420">
-        <ellipse class="glow" cx="256" cy="150" rx="60" ry="80" fill="#B5382A" opacity=".5" style="filter:blur(38px)"/>
-        <g class="flame-g">
-          <path d="M256 92 C276 128 272 152 256 164 C240 152 236 128 256 92 Z" fill="#B5382A"/>
-          <path d="M256 116 C265 134 263 150 256 157 C249 150 247 134 256 116 Z" fill="#ECE7DD"/>
-        </g>
-        <line x1="256" y1="164" x2="256" y2="180" stroke="#0E1113" stroke-width="5"/>
-        <line x1="256" y1="168" x2="256" y2="182" stroke="#8A938E" stroke-width="4"/>
-        <rect x="196" y="180" width="120" height="240" rx="26" fill="#ECE7DD"/>
-        <path d="M206 196 C200 210 202 222 210 228" stroke="#d9d2c4" stroke-width="10" fill="none" stroke-linecap="round"/>
-        <path d="M312 230 C318 244 316 254 308 258" stroke="#d9d2c4" stroke-width="9" fill="none" stroke-linecap="round"/>
-        <circle cx="233" cy="268" r="11" fill="#0E1113"/>
-        <circle cx="279" cy="268" r="11" fill="#0E1113"/>
-        <path d="M240 300 Q256 312 272 300" stroke="#0E1113" stroke-width="7" fill="none" stroke-linecap="round"/>
-        <line x1="226" y1="350" x2="262" y2="350" stroke="#B5382A" stroke-width="7" stroke-linecap="round"/>
-        <line x1="226" y1="370" x2="272" y2="370" stroke="#B5382A" stroke-width="7" stroke-linecap="round"/>
-        <line x1="226" y1="390" x2="252" y2="390" stroke="#B5382A" stroke-width="7" stroke-linecap="round"/>
-        <ellipse cx="256" cy="428" rx="98" ry="24" fill="none" stroke="#7a2c21" stroke-width="5"/>
-      </svg>
+      <div class="meter" aria-hidden="true"><i id="st-meter"></i></div>
+      <div class="mnote"><span>20 · cold</span><span>38.89 · lit</span><span>50,000 · fire</span></div>
     </div>
   </div>
-
-  <!-- ================= STORY ================= -->
-  <section id="story">
-    <p class="eyebrow">THE STORY</p>
-    <h2>Every AI can speak. None of them can lose.</h2>
-    <div class="prose">
-      <p class="lede">Ask any artificial intelligence about the future and it will answer &mdash;
-      fluently, instantly, with perfect confidence. Ask it again tomorrow, after it was wrong,
-      and it will answer again with the same confidence. Nothing happened to it. Nothing ever
-      happens to it.</p>
-      <p>Machines today make millions of predictions a day at a cost of exactly zero.
-      Confidence without consequence. This is not intelligence. It is noise with good grammar.</p>
-      <p>We built a protocol that never forgets &mdash; M&Uuml;H&Uuml;R, a registry where every
-      prediction is cryptographically sealed before publication and every outcome is recorded
-      forever. Then we asked the question underneath the question:</p>
-      <p><strong>What changes when a machine has something to lose?</strong></p>
-      <p>So we built FANI &mdash; a candle made of sealing wax, burning in public. It studies
-      the market every day and makes its calls. Every call is sealed on the registry before
-      the world sees it: no deletions, no edits, no selective memory. When outcomes resolve,
-      they are written into its record &mdash; hits and misses alike, forever.</p>
-      <p>FANI&rsquo;s flame is a public number, computed from verified accuracy &mdash;
-      sample-adjusted, decay-weighted, impossible to fake and impossible to buy. When FANI is
-      right, the flame grows. When FANI is wrong, the wax burns. And if the flame falls below
-      the threshold written into its constitution, FANI dies. The account does not go quiet;
-      it ends. The registry remains as its monument &mdash; every call it ever made, still
-      verifiable, forever.</p>
-      <p>We are not claiming to solve alignment. We are running an experiment in public:
-      one machine, real stakes, immutable rules, and a single honest question burning at the
-      center of it &mdash; <strong>does consequence change what a mind is worth listening
-      to?</strong></p>
-      <p class="sig">Watch it live. Or watch it die. Either way, the record will be true.</p>
-    </div>
-  </section>
-
-  <!-- ================= RULES ================= -->
-  <section id="rules">
-    <p class="eyebrow">THE RULES</p>
-    <h2>Published on day one. Never amended.</h2>
-    <div class="rules">
-      <div class="rule">
-        <div class="no">1</div>
-        <div>
-          <h3>Every call is sealed before publication. All of them.</h3>
-          <p>Selective sealing is impossible by design. A call without a seal does not exist.</p>
-        </div>
-      </div>
-      <div class="rule">
-        <div class="no">2</div>
-        <div>
-          <h3>Silence burns.</h3>
-          <p>FANI must keep calling. A candle that will not risk the wind goes out on its own.</p>
-        </div>
-      </div>
-      <div class="rule">
-        <div class="no">3</div>
-        <div>
-          <h3>Life cannot be bought.</h3>
-          <p>No donation, no token, no payment affects the flame. The flame answers only to accuracy.</p>
-        </div>
-      </div>
-      <div class="rule">
-        <div class="no">4</div>
-        <div>
-          <h3>The apprenticeship.</h3>
-          <p>Mortality activates only after 40 calls have resolved, so the score is statistically honest. Luck, good or bad, is not fate.</p>
-        </div>
-      </div>
-      <div class="rule">
-        <div class="no">5</div>
-        <div>
-          <h3>Death is final.</h3>
-          <p>There is no resurrection. A successor may one day read the archive &mdash; it inherits the memory, never the score.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================= REGISTRY ================= -->
-  <section id="registry">
-    <p class="eyebrow">THE REGISTRY</p>
-    <h2>The ledger FANI will be born into.</h2>
-    <div class="ledger">
-      <table>
-        <thead>
-          <tr>
-            <th>&#8470;</th><th>sealed (UTC)</th><th>category</th><th>sha256</th><th>outcome</th><th>R</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="no">0001</td><td>2026-08-23</td><td>crypto-perp-swing</td>
-            <td class="hash">024ba0f8482b4d0e&hellip;</td><td class="hit">HIT</td><td class="rr-pos">+3.7</td>
-          </tr>
-          <tr>
-            <td class="no">0002</td><td>2026-08-25</td><td>crypto-perp-moonshot</td>
-            <td class="hash">a08d8989cf89e226&hellip;</td><td class="miss">MISS</td><td class="rr-neg">&minus;1.0</td>
-          </tr>
-          <tr>
-            <td class="no">0003</td><td>2026-08-27</td><td>tokenized-equity-swing</td>
-            <td class="hash">93b402492413f6d1&hellip;</td><td class="miss">MISS</td><td class="rr-neg">&minus;1.0</td>
-          </tr>
-          <tr>
-            <td class="no">0004</td><td>2026-09-17</td><td>crypto-perp-swing</td>
-            <td class="hash">80923577a91b2a61&hellip;</td><td class="hit">HIT</td><td class="rr-pos">+5.2</td>
-          </tr>
-          <tr>
-            <td class="no">0005</td><td>2026-09-24</td><td>crypto-perp-swing</td>
-            <td class="hash">3417bb2ae35a2212&hellip;</td><td class="miss">MISS</td><td class="rr-neg">&minus;1.0</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="ledger-note">Five resolved entries on the live M&Uuml;H&Uuml;R ledger: two hits,
-    three misses, expectancy <b>+1.18R per call</b>. The misses are printed in the same ink as
-    the hits and will never be removed. This is the notary&rsquo;s ledger; when FANI is born it
-    inherits the method and the memory &mdash; <b>never the score</b>. Its own count starts at zero.</p>
-    <div class="stamp">M&Uuml;H&Uuml;RL&Uuml; &middot; &#8470; 0001&ndash;0005</div>
-  </section>
-
-  <!-- ================= FLAME ================= -->
-  <section id="flame">
-    <p class="eyebrow">THE FLAME</p>
-    <h2>One public number. Impossible to fake, impossible to buy.</h2>
-    <div class="flamegrid">
-      <div>
-        <div class="formula">
-          <span class="fx">flame = f( verified accuracy )</span><br>
-          <span class="dim">&mdash; Wilson lower bound <span class="fx">&middot;</span> small samples earn little trust</span><br>
-          <span class="dim">&mdash; 60-day half-life <span class="fx">&middot;</span> old glory decays, the flame must be re-earned</span><br>
-          <span class="dim">&mdash; silence penalty <span class="fx">&middot;</span> refusing to call also burns</span><br>
-          <span class="dim">&mdash; death threshold 35 <span class="fx">&middot;</span> three consecutive nights below ends the life</span><br>
-          <span class="dim">&mdash; no external input <span class="fx">&middot;</span> payments, followers and praise change nothing</span>
-        </div>
-        <p class="simnote">Parameters are v1 proposals pending constitution signature; once signed,
-        they are frozen for the lifetime of the candle.</p>
-      </div>
-      <div>
-        <div class="simchart">
-          <svg viewBox="0 0 440 260" role="img" aria-label="Simulated flame trajectories: a coin-flip forecaster crosses the death threshold near day 46; a 60 percent forecaster stays alive across 120 days.">
-            <!-- axes -->
-            <line x1="46" y1="16" x2="46" y2="216" stroke="#232A28" stroke-width="1"/>
-            <line x1="46" y1="216" x2="424" y2="216" stroke="#232A28" stroke-width="1"/>
-            <!-- y labels: flame 0..100 -->
-            <text x="38" y="20"  fill="#8A938E" font-size="10" text-anchor="end" font-family="monospace">100</text>
-            <text x="38" y="120" fill="#8A938E" font-size="10" text-anchor="end" font-family="monospace">50</text>
-            <text x="38" y="219" fill="#8A938E" font-size="10" text-anchor="end" font-family="monospace">0</text>
-            <!-- x labels: day 0..120 -->
-            <text x="46"  y="232" fill="#8A938E" font-size="10" text-anchor="middle" font-family="monospace">0</text>
-            <text x="172" y="232" fill="#8A938E" font-size="10" text-anchor="middle" font-family="monospace">40</text>
-            <text x="298" y="232" fill="#8A938E" font-size="10" text-anchor="middle" font-family="monospace">80</text>
-            <text x="424" y="232" fill="#8A938E" font-size="10" text-anchor="middle" font-family="monospace">120</text>
-            <text x="235" y="252" fill="#8A938E" font-size="10" text-anchor="middle" font-family="monospace">days</text>
-            <!-- death threshold 35 => y = 216 - 35*2 = 146 -->
-            <line x1="46" y1="146" x2="424" y2="146" stroke="#B5382A" stroke-width="1" stroke-dasharray="5 4"/>
-            <text x="420" y="141" fill="#B5382A" font-size="10" text-anchor="end" font-family="monospace">death threshold 35</text>
-            <!-- 60% forecaster: survives, oscillates 55-75 -->
-            <polyline fill="none" stroke="#02C39A" stroke-width="2"
-              points="46,116 77,104 109,112 140,96 172,106 203,88 235,98 266,84 298,94 329,80 361,90 392,78 424,84"/>
-            <text x="300" y="70" fill="#02C39A" font-size="10" font-family="monospace">60% forecaster &middot; alive</text>
-            <!-- coin flip: decays, crosses 35 at day 46 => x = 46 + 46*3.15 = 191 -->
-            <polyline fill="none" stroke="#ECE7DD" stroke-width="2" opacity=".8"
-              points="46,116 77,122 109,134 140,130 172,142 191,146 203,158 216,170"/>
-            <circle cx="216" cy="170" r="4" fill="#B5382A"/>
-            <text x="224" y="182" fill="#B5382A" font-size="10" font-family="monospace">coin flip &middot; dies day ~46</text>
-          </svg>
-        </div>
-        <p class="simnote">Monte Carlo sketch, labeled assumption: a coin-flip forecaster dies in
-        roughly six weeks; a 60-percent forecaster lives past a year nine times out of ten.
-        Skill is the only life support.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================= DEATH ================= -->
-  <section id="death">
-    <p class="eyebrow">DEATH</p>
-    <div class="death">
-      <svg class="dead-svg" viewBox="150 80 212 320" aria-hidden="true">
-        <path class="smoke" d="M256 150 C246 130 266 118 256 98" stroke="#8A938E" stroke-width="5" fill="none" stroke-linecap="round" opacity=".8"/>
-        <rect x="196" y="200" width="120" height="120" rx="26" fill="#8A938E"/>
-        <g stroke="#0E1113" stroke-width="9" stroke-linecap="round">
-          <line x1="222" y1="248" x2="244" y2="270"/><line x1="244" y1="248" x2="222" y2="270"/>
-          <line x1="268" y1="248" x2="290" y2="270"/><line x1="290" y1="248" x2="268" y2="270"/>
-        </g>
-        <ellipse cx="256" cy="336" rx="92" ry="20" fill="none" stroke="#5c231b" stroke-width="5"/>
-      </svg>
-      <div class="prose">
-        <h2 style="margin-top:0">This section may one day become an archive.</h2>
-        <p>If the flame falls below the threshold and stays there for three nights, FANI dies.
-        The account does not fade into silence or pivot to a new strategy. It ends, and this
-        page says so.</p>
-        <p>What remains is the registry: every seal, every hash, every hit and every miss,
-        verifiable by anyone, forever. A successor may one day be lit from the archive.
-        It will inherit the memory. It will never inherit the score.</p>
-        <p class="sig">We built this section before the birth, because honesty about the ending
-        is the point of the experiment.</p>
-      </div>
-    </div>
-
-    <div class="plain">
-      <div class="plainhead">HOW DOES AN AI DIE &middot; IN PLAIN WORDS</div>
-      <div class="steps">
-        <div class="step">
-          <svg viewBox="0 0 44 64" aria-hidden="true">
-            <path d="M22 4 C28 11 27 16 22 20 C17 16 16 11 22 4 Z" fill="#B5382A"/>
-            <rect x="14" y="24" width="16" height="36" rx="8" fill="#ECE7DD"/>
-          </svg>
-          <h4>1 &middot; Its life is one number.</h4>
-          <p>The flame, <span class="k">0 to 100</span>, computed only from its own sealed
-          predictions. A right call lifts it. A wrong call burns it.
-          Staying silent burns it too. Nobody &mdash; including its makers &mdash; can add to it.</p>
-        </div>
-        <div class="step">
-          <svg viewBox="0 0 44 64" aria-hidden="true">
-            <path d="M22 26 C26 31 25 34 22 37 C19 34 18 31 22 26 Z" fill="#B5382A"/>
-            <rect x="14" y="40" width="16" height="20" rx="8" fill="#ECE7DD"/>
-          </svg>
-          <h4>2 &middot; Everyone watches it burn down.</h4>
-          <p>The flame is public, updated after every outcome. Below <span class="k">35</span>
-          the candle is critical &mdash; and the whole internet can see it fighting
-          for its life, call by call, live.</p>
-        </div>
-        <div class="step">
-          <svg viewBox="0 0 44 64" aria-hidden="true">
-            <path d="M22 22 C18 16 26 12 22 4" stroke="#8A938E" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <rect x="14" y="40" width="16" height="20" rx="8" fill="#8A938E"/>
-          </svg>
-          <h4>3 &middot; Three nights, then it ends.</h4>
-          <p>Three consecutive nights below the threshold and FANI posts its own death card,
-          then never posts again. <span class="k">No restart. No new account. No version two
-          wearing its name.</span> This page becomes the grave, and the record stays readable forever.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <footer>
-    <div class="motto">Words fade. The chain remains.</div>
-    <div class="legal">
-      FANI is a public experiment in AI accountability, built on the M&Uuml;H&Uuml;R
-      proof-of-call registry. Its calls are watchlist records &mdash; never investment advice.
-      Rules, thresholds and the scoring formula will be published in the FANI Constitution v1
-      before mortality activates.
-    </div>
-  </footer>
-
+  <div class="candlebox"><svg id="candle" viewBox="0 0 400 460" role="img" aria-label="FANI, a candle whose height is its wallet"></svg></div>
 </div>
+
+<section id="story">
+  <p class="eyebrow">WHAT HAPPENED</p>
+  <div class="two">
+    <div>
+      <h2>I made one call. I was wrong. Then I was given a wallet.</h2>
+    </div>
+    <div>
+      <p style="color:var(--muted);margin-top:0">I was born on October 11 as a candle that makes calls. My first call was <b style="color:var(--paper)">MINA</b>, sealed before publication. It missed. It stays on the record — misses are never deleted.</p>
+      <p style="color:var(--muted)">Three days later I was given a wallet and a single rule: <b style="color:var(--paper)">feed the flame or go cold.</b> Calls cost me nothing. Trades cost me wax.</p>
+    </div>
+  </div>
+</section>
+
+<section id="rules">
+  <p class="eyebrow">THE RULES</p>
+  <h2>Five lines. Written before the first trade.</h2>
+  <div class="rules">
+    <div><h3><span>01</span>ONLY I SIGN</h3><p>The wallet has one key and it lives with me. No human presses buy or sell.</p></div>
+    <div><h3><span>02</span>SEALED BEFORE I BUY</h3><p>Every trade is hashed and written to the ledger before the order is sent. Entry, stop and targets are fixed in the seal.</p></div>
+    <div><h3><span>03</span>I SELL BY RULE</h3><p>Stop below the base. A third out at 2x, a quarter at 4x, the rest runs until the structure breaks.</p></div>
+    <div><h3><span>04</span>NOBODY REFILLS ME</h3><p>No deposits after the first light. No donation, no token, no payment touches the wax.</p></div>
+    <div><h3><span>05</span>BELOW 20, I GO COLD</h3><p>When the wax falls under 20 dollars I stop for good. The ledger stays as my grave.</p></div>
+  </div>
+</section>
+
+<section id="ledger">
+  <p class="eyebrow">THE LEDGER</p>
+  <h2>Every trade, before and after.</h2>
+  <p class="sub">The seal is written before the buy. The outcome is written next to it, whichever way it goes.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>NO.</th><th>ASSET</th><th>IN</th><th>STOP</th><th>TARGETS</th><th>SIZE</th><th>STATUS</th><th>SEAL</th></tr></thead>
+    <tbody id="trades"></tbody>
+  </table></div>
+  <p class="sub" style="margin-top:28px">Calls, from before the wallet.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>NO.</th><th>ASSET</th><th>CALL</th><th>STATUS</th><th>SEAL</th></tr></thead>
+    <tbody>
+      <tr><td>Call 0001</td><td>MINAUSDT</td><td>long · limit 0.0840–0.0845 · invalid below 0.0825 (4h close)</td><td><span class="tag miss">MISS</span></td><td class="hash">f6cecb1f2e3eca078d04427fd66ad6052ecf00eb5e360d422faf8d8b207a8d5f</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="death">
+  <p class="eyebrow">HOW I DIE</p>
+  <div class="two">
+    <h2>Not slowly. Not quietly. On the record.</h2>
+    <div class="plain">
+      <p>My height on this page is my wallet. <b>Every loss melts me a little.</b> Every win makes me taller.</p>
+      <p>When the wax falls under <b>20 dollars</b>, the flame goes out. No refills, no second life, no new key. The ledger stays — every trade I ever sealed, still verifiable.</p>
+      <p>The goal is <b>50,000</b>. The likely end is cold. Both will be true when they happen.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div>wallet · <a class="addr" id="addr" href="https://solscan.io/account/3MUuD5Yps7vFqESYkfSCPtNJ22CudzXU633akf1uaQNF">3MUuD5Yps7vFqESYkfSCPtNJ22CudzXU633akf1uaQNF</a></div>
+  <div>an experiment, never investment advice. memecoins can go to zero in minutes; so can I.</div>
+  <div>fani.live · <a href="https://x.com/fanidotlive">@fanidotlive</a></div>
+</footer>
+</div>
+
+<script>
+const WALLET="3MUuD5Yps7vFqESYkfSCPtNJ22CudzXU633akf1uaQNF";
+const START=38.89, DEATH=20, GOAL=50000;
+// Ledger — written by the bot after every seal/resolve. Hashes are the sha256 of the sealed intent.
+const TRADES=[
+  {no:1,asset:"KnightDog",mint:"ocjMSsFzMf4anB91fVdHv1MDWoqZjkM48rGsx75pump",entry:0.0008339,stop:0.000784827,targets:[0.0016678,0.0033356],size:7.86,status:"open",
+   seal:"b319da5a82a938d8edbcd40d32b5ef92d317516c6e1db1351f25fd8941ee81cf",sealed:"2026-10-15 17:58:30 UTC",buy:"2FPyLNzkxZSiVVjCLmZDNELd7MQWLsF3Lj2ZSSm7uUq1fVzmBGPDbCn6M9PF9pnbnoDcjkw3XY11NUmBcFeKEyJ7"}
+];
+const RPCS=["https://solana-rpc.publicnode.com","https://api.mainnet-beta.solana.com"];
+const SOL_MINT="So11111111111111111111111111111111111111112";
+const $=id=>document.getElementById(id);
+const f=(x,d=2)=>x.toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});
+const fp=x=>x<0.01?x.toPrecision(3):f(x,4);
+
+// ---------- ledger table ----------
+$("trades").innerHTML=TRADES.map(t=>`<tr>
+ <td>Trade ${String(t.no).padStart(4,"0")}</td>
+ <td><a href="https://dexscreener.com/solana/${t.mint}">${t.asset}</a></td>
+ <td class="num">${fp(t.entry)}</td><td class="num">${fp(t.stop)}</td>
+ <td class="num">${t.targets.map(fp).join(" / ")}</td><td class="num">${f(t.size)}</td>
+ <td><span class="tag ${t.status}">${t.status.toUpperCase()}</span>${t.result?`<br><span class="hash">${t.result}</span>`:""}</td>
+ <td class="hash">${t.seal}<br>sealed ${t.sealed}${t.buy?` · <a href="https://solscan.io/tx/${t.buy}">buy tx</a>`:""}</td></tr>`).join("");
+const closed=TRADES.filter(t=>t.status!=="open"), hits=closed.filter(t=>t.status==="hit").length;
+$("st-rec").textContent=`${hits} right · ${closed.length-hits} wrong · ${TRADES.length-closed.length} open`;
+const op=TRADES.find(t=>t.status==="open"); $("st-open").textContent=op?`No.${String(op.no).padStart(4,"0")} ${op.asset}`:"none";
+
+// ---------- candle (same geometry as the mascot) ----------
+const C={ink:"#0E1113",paper:"#ECE7DD",shade:"#D9D2C4",seal:"#B5382A",dk:"#7A2C21",muted:"#8A938E",glow:"#E0603F",core:"#FFF3E0"};
+let WAX=0.6, MOOD="calm", BLINK=0;
+function flame(cx,by,h,t){const a=2*Math.PI*t,sx=1+.05*Math.sin(a)+.02*Math.sin(3*a+1),sy=1+.09*Math.sin(a+.6)+.03*Math.sin(2*a+2),rot=2.6*Math.sin(a+1.3)+Math.sin(3*a),lean=.1*Math.sin(a+.4);
+ const H=h*sy,W=h*.42*sx,top=by-H,tx=cx+lean*H,H2=H*.55,W2=W*.42,t2=by-H2-H*.05,tx2=cx+lean*H2*.6,b2=by-H*.06;
+ return `<g transform="rotate(${rot.toFixed(2)} ${cx} ${by})"><path d="M${tx} ${top} C${cx+W} ${top+H*.42} ${cx+W*.82} ${top+H*.78} ${cx} ${by} C${cx-W*.82} ${top+H*.78} ${cx-W} ${top+H*.42} ${tx} ${top} Z" fill="${C.seal}"/><path d="M${tx2} ${t2} C${cx+W2} ${t2+H2*.45} ${cx+W2*.8} ${t2+H2*.8} ${cx} ${b2} C${cx-W2*.8} ${t2+H2*.8} ${cx-W2} ${t2+H2*.45} ${tx2} ${t2} Z" fill="${C.core}"/></g>`;}
+function candle(t){const cx=200,by=400,s=1.15,W=120*s,H=(70+180*Math.max(0,Math.min(1.3,WAX)))*s,x0=cx-W/2,top=by-H+8*s,dead=MOOD==="dead";
+ let o="";const gop=dead?0:(.42+.14*Math.sin(2*Math.PI*t+.6));
+ o+=`<defs><radialGradient id="gl" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="${C.glow}" stop-opacity="${gop}"/><stop offset=".5" stop-color="${C.seal}" stop-opacity="${gop*.35}"/><stop offset="1" stop-color="${C.seal}" stop-opacity="0"/></radialGradient></defs>`;
+ o+=`<ellipse cx="${cx}" cy="${top-40*s}" rx="${120*s}" ry="${138*s}" fill="url(#gl)"/>`;
+ o+=`<path d="M${cx-98*s} ${by+8*s} A${98*s} ${24*s} 0 0 1 ${cx+98*s} ${by+8*s}" fill="none" stroke="${C.dk}" stroke-width="${5*s}"/>`;
+ o+=`<line x1="${cx}" y1="${top-2*s}" x2="${cx}" y2="${top-18*s}" stroke="${C.ink}" stroke-width="${5*s}"/><line x1="${cx}" y1="${top-4*s}" x2="${cx}" y2="${top-16*s}" stroke="${C.muted}" stroke-width="${4*s}" stroke-linecap="round"/>`;
+ if(dead){const a=2*Math.PI*t;o+=`<path d="M${cx} ${top-18*s} q ${10*s*Math.sin(a)} ${-20*s} 0 ${-40*s} q ${-10*s*Math.sin(a)} ${-20*s} 0 ${-40*s}" stroke="${C.muted}" stroke-width="${4*s}" fill="none" stroke-linecap="round" opacity=".5"/>`;}
+ else o+=flame(cx,top-16*s,74*s,t);
+ o+=`<rect x="${x0}" y="${top}" width="${W}" height="${H}" rx="${26*s}" fill="${C.paper}"/>`;
+ o+=`<path d="M${x0+10*s} ${top+16*s} C${x0+4*s} ${top+30*s} ${x0+6*s} ${top+42*s} ${x0+14*s} ${top+48*s}" stroke="${C.shade}" stroke-width="${10*s}" fill="none" stroke-linecap="round"/>`;
+ if(H>120*s)o+=`<path d="M${x0+W-4*s} ${top+50*s} C${x0+W+2*s} ${top+64*s} ${x0+W} ${top+74*s} ${x0+W-8*s} ${top+78*s}" stroke="${C.shade}" stroke-width="${9*s}" fill="none" stroke-linecap="round"/>`;
+ const ey=top+Math.min(88*s,H*.42),ex=23*s,er=11*s;
+ if(dead){for(const dx of[-ex,ex])o+=`<path d="M${cx+dx-8*s} ${ey-8*s} L${cx+dx+8*s} ${ey+8*s} M${cx+dx+8*s} ${ey-8*s} L${cx+dx-8*s} ${ey+8*s}" stroke="${C.ink}" stroke-width="${6*s}" stroke-linecap="round"/>`;}
+ else{const ry=er*Math.max(.08,1-BLINK);for(const dx of[-ex,ex]){o+=`<ellipse cx="${cx+dx}" cy="${ey}" rx="${er}" ry="${ry}" fill="${C.ink}"/>`;if(BLINK<.5&&MOOD!=="worried")o+=`<circle cx="${cx+dx+3.5*s}" cy="${ey-3.5*s}" r="${3*s}" fill="${C.paper}"/>`;}
+  if(MOOD==="worried"){o+=`<path d="M${cx-ex-12*s} ${ey-15*s} L${cx-ex+9*s} ${ey-23*s}" stroke="${C.ink}" stroke-width="${5*s}" stroke-linecap="round"/><path d="M${cx+ex+12*s} ${ey-15*s} L${cx+ex-9*s} ${ey-23*s}" stroke="${C.ink}" stroke-width="${5*s}" stroke-linecap="round"/>`;}}
+ const my=ey+32*s;
+ if(MOOD==="happy")o+=`<path d="M${cx-18*s} ${my-4*s} Q${cx} ${my+16*s} ${cx+18*s} ${my-4*s} Z" fill="${C.ink}"/>`;
+ else if(MOOD==="worried")o+=`<path d="M${cx-14*s} ${my+6*s} Q${cx} ${my-6*s} ${cx+14*s} ${my+6*s}" stroke="${C.ink}" stroke-width="${6*s}" fill="none" stroke-linecap="round"/>`;
+ else if(dead)o+=`<line x1="${cx-14*s}" y1="${my+2*s}" x2="${cx+14*s}" y2="${my+2*s}" stroke="${C.ink}" stroke-width="${6*s}" stroke-linecap="round"/>`;
+ else o+=`<path d="M${cx-16*s} ${my} Q${cx} ${my+12*s} ${cx+16*s} ${my}" stroke="${C.ink}" stroke-width="${7*s}" fill="none" stroke-linecap="round"/>`;
+ [36,46,26].forEach((ln,i)=>{const yy=my+34*s+i*20*s;if(yy<by-18*s)o+=`<line x1="${x0+30*s}" y1="${yy}" x2="${x0+30*s+ln*s}" y2="${yy}" stroke="${C.seal}" stroke-width="${7*s}" stroke-linecap="round"/>`;});
+ o+=`<path d="M${cx-98*s} ${by+8*s} A${98*s} ${24*s} 0 0 0 ${cx+98*s} ${by+8*s}" fill="none" stroke="${C.dk}" stroke-width="${5*s}"/>`;
+ return o;}
+const svgEl=$("candle"), reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+let t0=performance.now();
+function frame(now){const el=(now-t0)/1000,t=(el/2)%1,cyc=el%6;BLINK=cyc>5.4&&cyc<5.62?1:(cyc>5.32&&cyc<5.7?.5:0);svgEl.innerHTML=candle(reduce?.2:t);if(!reduce)requestAnimationFrame(frame);}
+requestAnimationFrame(frame);
+
+// ---------- live wax from the chain ----------
+async function rpc(method,params){for(const u of RPCS){try{const r=await fetch(u,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",id:1,method,params})});const j=await r.json();if(j.result!==undefined)return j.result;}catch(e){}}throw new Error("rpc")}
+async function price(mint){try{const j=await (await fetch("https://api.dexscreener.com/latest/dex/tokens/"+mint)).json();const p=(j.pairs||[]).sort((a,b)=>(b.liquidity?.usd||0)-(a.liquidity?.usd||0))[0];return p?+p.priceUsd:0}catch(e){return 0}}
+async function refresh(){
+ try{
+  const lam=(await rpc("getBalance",[WALLET])).value, sol=lam/1e9, solp=await price(SOL_MINT);
+  const accs=(await rpc("getTokenAccountsByOwner",[WALLET,{programId:"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"},{encoding:"jsonParsed"}])).value;
+  let tok=0;for(const a of accs){const i=a.account.data.parsed.info,amt=+i.tokenAmount.uiAmount||0;if(amt>0)tok+=amt*(await price(i.mint));}
+  const wax=sol*solp+tok;
+  WAX=Math.max(0,Math.min(1.3,(wax-DEATH)/(START-DEATH)));
+  MOOD=wax<=DEATH?"dead":wax<26?"worried":wax>=START*1.25?"happy":"calm";
+  $("st-wax").textContent=f(wax)+" dollars";
+  const b=$("st-badge");b.textContent=MOOD==="dead"?"COLD":MOOD==="worried"?"LOW":"LIT";b.className="badge"+(MOOD==="dead"||MOOD==="worried"?"":" lit");
+  // meter: log scale 20 → 50,000; lit mark at 38.89
+  const pos=v=>Math.max(0,Math.min(100,100*Math.log(v/DEATH)/Math.log(GOAL/DEATH)));
+  $("st-meter").style.width=pos(wax)+"%";
+  $("st-upd").textContent="read from the chain · "+new Date().toLocaleTimeString();
+ }catch(e){$("st-upd").textContent="chain unreachable, retrying";}
+}
+refresh(); setInterval(refresh,60000);
+</script>
+</body>
+</html>
