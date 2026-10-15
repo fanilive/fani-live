@@ -87,7 +87,7 @@ footer .addr{word-break:break-all;color:var(--paper)}
         <div class="row"><span>record</span><span id="st-rec">—</span></div>
       </div>
       <div class="meter" aria-hidden="true"><i id="st-meter"></i></div>
-      <div class="mnote"><span>20 · cold</span><span>38.89 · lit</span><span>50,000 · fire</span></div>
+      <div class="mnote" style="position:relative;height:14px"><span style="position:absolute;left:0">20 · cold</span><span style="position:absolute;left:8.4%">▲ 38.89 · lit</span><span style="position:absolute;right:0">50,000 · fire</span></div>
     </div>
   </div>
   <div class="candlebox"><svg id="candle" viewBox="0 0 400 460" role="img" aria-label="FANI, a candle whose height is its wallet"></svg></div>
@@ -159,8 +159,8 @@ const WALLET="3MUuD5Yps7vFqESYkfSCPtNJ22CudzXU633akf1uaQNF";
 const START=38.89, DEATH=20, GOAL=50000;
 // Ledger — written by the bot after every seal/resolve. Hashes are the sha256 of the sealed intent.
 const TRADES=[
-  {no:1,asset:"KnightDog",mint:"ocjMSsFzMf4anB91fVdHv1MDWoqZjkM48rGsx75pump",entry:0.0008339,stop:0.000784827,targets:[0.0016678,0.0033356],size:7.86,status:"open",
-   ata:"9f29cEEvaUcYudoXaB9U86TZzz2oYd984xLWNLwW3BGG",seal:"b319da5a82a938d8edbcd40d32b5ef92d317516c6e1db1351f25fd8941ee81cf",sealed:"2026-10-15 17:58:30 UTC",buy:"2FPyLNzkxZSiVVjCLmZDNELd7MQWLsF3Lj2ZSSm7uUq1fVzmBGPDbCn6M9PF9pnbnoDcjkw3XY11NUmBcFeKEyJ7"}
+  {no:1,asset:"KnightDog",mint:"ocjMSsFzMf4anB91fVdHv1MDWoqZjkM48rGsx75pump",entry:0.0008339,stop:0.000784827,targets:[0.0016678,0.0033356],size:7.86,status:"miss",result:"closed 20:39 · out at 0.000743 · −0.99 dollars · stop slipped 5.4%",
+   ata:"9f29cEEvaUcYudoXaB9U86TZzz2oYd984xLWNLwW3BGG",seal:"b319da5a82a938d8edbcd40d32b5ef92d317516c6e1db1351f25fd8941ee81cf",sealed:"2026-10-15 17:58:30 UTC",buy:"2FPyLNzkxZSiVVjCLmZDNELd7MQWLsF3Lj2ZSSm7uUq1fVzmBGPDbCn6M9PF9pnbnoDcjkw3XY11NUmBcFeKEyJ7",sell:"28C3GDcRtGtdv3R7ghYaZAwE15M76bLTFR1w4StDPe7b9pKkSaKNRzH1ZZwhxZUTtyn6gi7KRJ6mZ5FdTF5FRLtq"}
 ];
 const RPCS=["https://rpc.solanatracker.io/public","https://solana.publicnode.com"];
 const SOL_MINT="So11111111111111111111111111111111111111112";
@@ -175,10 +175,10 @@ $("trades").innerHTML=TRADES.map(t=>`<tr>
  <td class="num">${fp(t.entry)}</td><td class="num">${fp(t.stop)}</td>
  <td class="num">${t.targets.map(fp).join(" / ")}</td><td class="num">${f(t.size)}</td>
  <td><span class="tag ${t.status}">${t.status.toUpperCase()}</span>${t.result?`<br><span class="hash">${t.result}</span>`:""}</td>
- <td class="hash">${t.seal}<br>sealed ${t.sealed}${t.buy?` · <a href="https://solscan.io/tx/${t.buy}">buy tx</a>`:""}</td></tr>`).join("");
+ <td class="hash">${t.seal}<br>sealed ${t.sealed}${t.buy?` · <a href="https://solscan.io/tx/${t.buy}">buy tx</a>`:""}${t.sell?` · <a href="https://solscan.io/tx/${t.sell}">sell tx</a>`:""}</td></tr>`).join("");
 const closed=TRADES.filter(t=>t.status!=="open"), hits=closed.filter(t=>t.status==="hit").length;
 $("st-rec").textContent=`${hits} right · ${closed.length-hits} wrong · ${TRADES.length-closed.length} open`;
-const op=TRADES.find(t=>t.status==="open"); $("st-open").textContent=op?`No.${String(op.no).padStart(4,"0")} ${op.asset}`:"none";
+const op=TRADES.find(t=>t.status==="open"); $("st-open").textContent=op?`No.${String(op.no).padStart(4,"0")} ${op.asset}`:"none · scanning";
 
 // ---------- candle (same geometry as the mascot) ----------
 const C={ink:"#0E1113",paper:"#ECE7DD",shade:"#D9D2C4",seal:"#B5382A",dk:"#7A2C21",muted:"#8A938E",glow:"#E0603F",core:"#FFF3E0"};
