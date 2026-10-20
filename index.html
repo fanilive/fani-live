@@ -37,7 +37,8 @@ header{display:flex;align-items:center;justify-content:space-between;flex-wrap:w
 .word{display:inline-flex;align-items:baseline}
 .word .i{position:relative;display:inline-block}
 .word .i i{position:absolute;left:50%;border-radius:50%;background:var(--core);transform:translateX(-50%)}
-.word .i svg.fl{position:absolute;left:50%;top:.047em;width:.14em;height:.21em;transform:translateX(calc(-50% + .014em));overflow:visible}
+.word .c{position:relative;display:inline-block;width:.238em;height:.87em}
+.word .c svg{position:absolute;left:0;top:0;width:.238em;height:1em;overflow:visible}
 .word{letter-spacing:-.025em}
 nav{display:flex;gap:26px;flex-wrap:wrap;font-family:'IBM Plex Mono';font-size:12px;letter-spacing:2px;text-transform:lowercase}
 .hero{display:flex;flex-wrap:wrap;align-items:center;gap:56px;padding:64px 0 96px}
@@ -86,7 +87,7 @@ footer nav a{color:var(--muted)}footer nav a:hover{color:var(--core)}
 <body>
 <div class="wrap">
 <header>
-  <a class="logo" href="#top" aria-label="fâni home"><span class="word">fân<span class="i">ı<svg class="fl" viewBox="0 0 20 30" aria-hidden="true"><path d="M10 30 C 5 30 1 26.5 1 21 C 1 14 8 11.5 12.2 1.5 C 16.5 6 19 13 19 21 C 19 26.5 15 30 10 30 Z" fill="#E0603F"/></svg></span></span></a>
+  <a class="logo" href="#top" aria-label="fâni home"><span class="word">fân<span class="c"><svg viewBox="0 0 238 1000" aria-hidden="true"><path d="M76.7 870 L76.7 350 C 80 338 100 330 131.7 330 C 163 330 183 338 186.7 350 C 191 358 194 368 195 384 C 196 420 195 450 196 482 C 197 504 212 518 213 546 C 214 566 201 578 192 575 C 187 573 186.7 560 186.7 545 L186.7 870 Z" fill="currentColor"/><g transform="rotate(3 131.7 240)"><path d="M131.7 97 C 166 136 186 186 184 236 C 182 284 172 320 160 338 C 152 352 112 352 104 338 C 92 320 81 284 79 236 C 77 186 97 136 131.7 97 Z" fill="#E0603F"/></g></svg></span></span></a>
   <nav><a href="#story">story</a><a href="#how">how it works</a><a href="#ledger">ledger</a><a href="verdicts.html" style="color:var(--core)">verdicts</a><a href="#roadmap">roadmap</a><a href="#manifesto">manifesto</a><a href="https://x.com/fanidotlive">x</a><a href="https://github.com/fanilive">github</a></nav>
 </header>
 
@@ -103,7 +104,7 @@ footer nav a{color:var(--muted)}footer nav a:hover{color:var(--core)}
     <div class="candle">
       <svg id="candle" width="180" height="288" viewBox="0 0 100 160" role="img" aria-label="fâni candle; the wax level is the wallet">
         <ellipse cx="50" cy="48" rx="30" ry="34" fill="#E0603F" opacity=".08"/>
-        <g id="flame" transform="translate(39,32) scale(1.1)"><path d="M10 30 C 5 30 1 26.5 1 21 C 1 16 4.3 13 5 8.5 C 7.6 10.6 8.8 12.8 8.6 15 C 11 13 13.2 9.5 12.2 1.5 C 16.5 6 19 13 19 21 C 19 26.5 15 30 10 30 Z" fill="#E0603F"/></g>
+        <g id="flame" transform="translate(31.6,16.4) scale(0.14)"><path d="M131.7 97 C 166 136 186 186 184 236 C 182 284 172 320 160 338 C 152 352 112 352 104 338 C 92 320 81 284 79 236 C 77 186 97 136 131.7 97 Z" fill="#E0603F"/></g>
         <line x1="50" y1="66" x2="50" y2="74" stroke="#ECE7DD" stroke-width="2.2" stroke-linecap="round"/>
         <rect x="33" y="74" width="34" height="75" rx="2" fill="none" stroke="#ECE7DD" stroke-width="2.2"/>
         <rect id="wax" x="35" y="96" width="30" height="51" rx="1" fill="#ECE7DD" opacity=".12"/>
